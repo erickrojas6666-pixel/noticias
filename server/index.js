@@ -1,28 +1,69 @@
+// server/index.js
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
+// Importar rutas (usando require)
+const authRoutes = require('./routes/authRoutes');
+const favoriteRoutes = require('./routes/favoriteRoutes');
+
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Configuración CORS más permisiva para desarrollo
+// ========== SEGURIDAD ==========
+app.use(helmet());
+
+// Rate limiting (previene ataques de fuerza bruta)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // límite de 100 peticiones por IP
+  message: {
+    success: false,
+    message: 'Demasiadas peticiones desde esta IP, intenta de nuevo en 15 minutos'
+  }
+});
+app.use('/api', limiter);
+
+// ========== CORS ==========
 app.use(cors({
-  origin: '*', // En desarrollo, permitir cualquier origen
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: process.env.FRONTEND_URL || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
+// ========== MIDDLEWARE ==========
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Endpoint de prueba
+// ========== RUTAS ==========
+
+// 1. Ruta de salud
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-// Endpoint para obtener noticias
+// 2. Autenticación (NUEVO)
+app.use('/api/auth', authRoutes);
+
+// 3. Favoritos (NUEVO) - protege con autenticación
+app.use('/api/favoritos', favoriteRoutes);
+
+// 4. Noticias (TU CÓDIGO EXISTENTE)
 app.get('/api/noticias', async (req, res) => {
   try {
-    const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${process.env.NEWS_API_KEY}`);
+    const response = await axios.get(
+      `https://newsapi.org/v2/top-headlines?country=us&apiKey=${process.env.NEWS_API_KEY}`
+    );
     res.json(response.data);
   } catch (error) {
     console.error('Error en API de noticias:', error.message);
@@ -33,19 +74,50 @@ app.get('/api/noticias', async (req, res) => {
   }
 });
 
-// Endpoint para búsqueda de noticias (opcional)
+// 5. Búsqueda de noticias
 app.get('/api/noticias/buscar', async (req, res) => {
   const { query } = req.query;
   try {
-    const response = await axios.get(`https://newsapi.org/v2/everything?q=${query}&apiKey=${process.env.NEWS_API_KEY}`);
+    const response = await axios.get(
+      `https://newsapi.org/v2/everything?q=${query}&apiKey=${process.env.NEWS_API_KEY}`
+    );
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: 'Error en la búsqueda' });
+    console.error('Error en búsqueda:', error.message);
+    res.status(500).json({ 
+      error: 'Error en la búsqueda',
+      details: error.message 
+    });
   }
 });
 
-const PORT = process.env.PORT || 3000;
+// ========== MANEJO DE ERRORES ==========
+
+// Ruta 404 - No encontrada
+app.use((req, res) => {
+  res.status(404).json({ 
+    success: false, 
+    message: 'Ruta no encontrada' 
+  });
+});
+
+// Middleware de error global
+app.use((err, req, res, next) => {
+  console.error('❌ Error global:', err.stack);
+  res.status(500).json({ 
+    success: false, 
+    message: 'Error interno del servidor',
+    ...(process.env.NODE_ENV === 'development' && { 
+      error: err.message,
+      stack: err.stack 
+    })
+  });
+});
+
+// ========== INICIO DEL SERVIDOR ==========
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
   console.log(`📍 Acceso local: http://localhost:${PORT}`);
+  console.log(`📊 Modo: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Frontend esperado: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
 });
