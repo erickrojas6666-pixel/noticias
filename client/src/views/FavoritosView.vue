@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { useNoticiasStore } from '../stores/noticiasStore';
 import NoticiaCard from '../components/NoticiaCard.vue';
-import { apiFetch } from '../services/api';  // 👈 IMPORTAR
+import { apiFetch } from '../services/api';
 
 const store = useNoticiasStore();
 
