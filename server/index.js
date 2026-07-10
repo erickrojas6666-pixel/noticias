@@ -1,14 +1,14 @@
-// server/index.js
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
+// server/index.js - VERSIÓN CON ES MODULES
+import express from 'express';
+import axios from 'axios';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 
-// Importar rutas (usando require)
-const authRoutes = require('./routes/authRoutes');
-const favoriteRoutes = require('./routes/favoriteRoutes');
+// Importar rutas (usando import)
+import authRoutes from './routes/authRoutes.js';
+import favoriteRoutes from './routes/favoriteRoutes.js';
 
 dotenv.config();
 
@@ -52,13 +52,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 2. Autenticación (NUEVO)
+// 2. Autenticación
 app.use('/api/auth', authRoutes);
 
-// 3. Favoritos (NUEVO) - protege con autenticación
+// 3. Favoritos - protege con autenticación
 app.use('/api/favoritos', favoriteRoutes);
 
-// 4. Noticias (TU CÓDIGO EXISTENTE)
+// 4. Noticias (tu código existente)
 app.get('/api/noticias', async (req, res) => {
   try {
     const response = await axios.get(
