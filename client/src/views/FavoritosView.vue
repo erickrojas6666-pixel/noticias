@@ -1,13 +1,13 @@
+<!-- client/src/views/FavoritosView.vue -->
 <template>
   <div>
     <h1>Mis Noticias Favoritas</h1>
     
-    <!-- Depuración: Muestra cuántos favoritos hay -->
-    <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
-      <strong>🔧 Debug:</strong> Tienes {{ store.favoritos.length }} favoritos guardados
+    <div v-if="store.loadingFavoritos" style="text-align: center; padding: 40px;">
+      ⏳ Cargando favoritos...
     </div>
     
-    <div v-if="store.favoritos.length === 0" style="text-align: center; padding: 40px; color: #666;">
+    <div v-else-if="store.favoritos.length === 0" style="text-align: center; padding: 40px; color: #666;">
       <p style="font-size: 1.2rem;">📭 No tienes favoritos aún</p>
       <p>Ve a la página de <router-link to="/">Inicio</router-link> y agrega algunas noticias a favoritos.</p>
     </div>
@@ -23,13 +23,15 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useNoticiasStore } from '../stores/noticiasStore';
 import NoticiaCard from '../components/NoticiaCard.vue';
 
 const store = useNoticiasStore();
 
-// Log para depuración
-console.log('📊 Favoritos cargados:', store.favoritos.length);
+onMounted(() => {
+  store.cargarFavoritos();
+});
 </script>
 
 <style scoped>

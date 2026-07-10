@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useNoticiasStore } from '../stores/noticiasStore';
 import type { Noticia } from '../stores/noticiasStore';
 
@@ -43,13 +43,19 @@ const props = defineProps<{
 }>();
 
 const store = useNoticiasStore();
+const guardando = ref(false);
 
-// Computed para verificar si es favorito
 const esFavorito = computed(() => store.esFavorito(props.noticia.url));
 
-// Función para alternar favorito
-const toggleFavorito = () => {
-  store.toggleFavorito(props.noticia);
+const toggleFavorito = async () => {
+  guardando.value = true;
+  try {
+    await store.toggleFavorito(props.noticia);
+  } catch (error) {
+    console.error('Error al guardar favorito:', error);
+  } finally {
+    guardando.value = false;
+  }
 };
 
 // Manejar error de imagen
