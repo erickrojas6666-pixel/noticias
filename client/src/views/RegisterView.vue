@@ -38,11 +38,11 @@
           />
         </div>
 
-        <!-- reCAPTCHA -->
+        <!-- 👇 reCAPTCHA con el nuevo componente -->
         <div class="form-group">
-          <VueRecaptcha
+          <ReCaptchaV2
             ref="recaptchaRef"
-            :sitekey="siteKey"
+            :siteKey="siteKey"
             @verify="onRecaptchaVerify"
             @expired="onRecaptchaExpired"
             @error="onRecaptchaError"
@@ -69,7 +69,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
-import VueRecaptcha from 'vue-recaptcha';
+import ReCaptchaV2 from '../components/ReCaptchaV2.vue'; // 👈 Importar el nuevo componente
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -82,8 +82,9 @@ const confirmPassword = ref('');
 const error = ref('');
 const loading = ref(false);
 const recaptchaToken = ref('');
-const recaptchaRef = ref<InstanceType<typeof VueRecaptcha>>();
+const recaptchaRef = ref<InstanceType<typeof ReCaptchaV2> | null>(null);
 
+// Eventos del reCAPTCHA
 const onRecaptchaVerify = (token: string) => {
   recaptchaToken.value = token;
   error.value = '';
@@ -125,12 +126,13 @@ const handleRegister = async () => {
       router.push('/');
     } else {
       error.value = result.message || 'Error al registrar usuario';
-      recaptchaRef.value?.reset();
+      // 👇 Resetear reCAPTCHA
+      recaptchaRef.value?.resetWidget();
       recaptchaToken.value = '';
     }
   } catch (err: any) {
     error.value = err.message || 'Error al registrar usuario';
-    recaptchaRef.value?.reset();
+    recaptchaRef.value?.resetWidget();
     recaptchaToken.value = '';
   } finally {
     loading.value = false;

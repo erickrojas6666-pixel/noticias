@@ -3,7 +3,7 @@
   <div class="auth-container">
     <div class="auth-card">
       <h1>Iniciar Sesión</h1>
-      
+
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">Email</label>
@@ -27,11 +27,11 @@
           />
         </div>
 
-        <!-- reCAPTCHA -->
+        <!-- 👇 Aquí va el componente reCAPTCHA -->
         <div class="form-group">
-          <VueRecaptcha
+          <ReCaptchaV2
             ref="recaptchaRef"
-            :sitekey="siteKey"
+            :siteKey="siteKey"
             @verify="onRecaptchaVerify"
             @expired="onRecaptchaExpired"
             @error="onRecaptchaError"
@@ -58,13 +58,13 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
-import VueRecaptcha from 'vue-recaptcha';
+import ReCaptchaV2 from '../components/ReCaptchaV2.vue';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-// Obtener site key del entorno
+// 👇 Tu site key (debe estar en .env)
 const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
 const email = ref('');
@@ -72,8 +72,9 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const recaptchaToken = ref('');
-const recaptchaRef = ref<InstanceType<typeof VueRecaptcha>>();
+const recaptchaRef = ref<InstanceType<typeof ReCaptchaV2> | null>(null);
 
+// Eventos del reCAPTCHA
 const onRecaptchaVerify = (token: string) => {
   recaptchaToken.value = token;
   error.value = '';
@@ -100,18 +101,19 @@ const handleLogin = async () => {
 
   try {
     const result = await authStore.login(email.value, password.value, recaptchaToken.value);
-    
+
     if (result.success) {
       const redirect = route.query.redirect as string || '/';
       router.push(redirect);
     } else {
       error.value = result.message || 'Error al iniciar sesión';
-      recaptchaRef.value?.reset();
+      // Resetear reCAPTCHA
+      recaptchaRef.value?.resetWidget();
       recaptchaToken.value = '';
     }
   } catch (err: any) {
     error.value = err.message || 'Error al iniciar sesión';
-    recaptchaRef.value?.reset();
+    recaptchaRef.value?.resetWidget();
     recaptchaToken.value = '';
   } finally {
     loading.value = false;
