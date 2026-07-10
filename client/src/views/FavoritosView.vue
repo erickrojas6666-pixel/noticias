@@ -1,19 +1,18 @@
-<template>
-  <div>
-    <h1>Mis Noticias Favoritas</h1>
-    <div v-if="store.favoritos.length === 0">No tienes favoritos aún.</div>
-    
-    <NoticiaCard 
-      v-for="noticia in store.favoritos" 
-      :key="noticia.url" 
-      :noticia="noticia" 
-    />
-  </div>
-</template>
-
-<script setup>
+// client/src/views/FavoritosView.vue
+<script setup lang="ts">
 import { useNoticiasStore } from '../stores/noticiasStore';
 import NoticiaCard from '../components/NoticiaCard.vue';
+import { apiFetch } from '../services/api';  // 👈 IMPORTAR
 
 const store = useNoticiasStore();
+
+// Ejemplo de cómo usar el servicio
+const cargarFavoritos = async () => {
+  try {
+    const data = await apiFetch('api/favoritos');
+    // Procesar datos...
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 </script>
