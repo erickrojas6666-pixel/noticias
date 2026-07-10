@@ -1,3 +1,5 @@
+// client/src/services/api.ts
+
 export const getServerUrl = (): string => {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (apiUrl) {
@@ -14,30 +16,33 @@ export const getServerUrl = (): string => {
   return 'http://localhost:3000';
 };
 
-// Función genérica para peticiones a la API
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const baseUrl = getServerUrl();
   const url = `${baseUrl}/api/${endpoint.startsWith('/') ? endpoint.slice(1) : endpoint}`;
   
   console.log(`🔗 Petición a: ${url}`);
   
-  // Obtener token del localStorage si existe
   const token = localStorage.getItem('token');
   
-  const headers: HeadersInit = {
+  // ✅ Usar Record<string, string> para headers
+  const headers: Record<string, string> = {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    ...options.headers
   };
 
-  // Si hay token, añadir al header Authorization
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  // Combinar headers de options
+  if (options.headers) {
+    const optionsHeaders = options.headers as Record<string, string>;
+    Object.assign(headers, optionsHeaders);
+  }
+
   const response = await fetch(url, {
+    ...options,
     headers,
-    ...options
   });
   
   if (!response.ok) {

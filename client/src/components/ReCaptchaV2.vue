@@ -4,11 +4,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, defineExpose } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 // Definir props
 const props = defineProps<{
-  siteKey: string; // La Site Key de reCAPTCHA
+  siteKey: string;
 }>();
 
 // Definir eventos
@@ -103,6 +103,13 @@ defineExpose({
 
 // Ejecutar al montar el componente
 onMounted(() => {
+  // Verificar que siteKey esté definida
+  if (!props.siteKey) {
+    console.error('❌ ReCaptchaV2: siteKey no definida');
+    emit('error');
+    return;
+  }
+  
   // Esperar un tick para asegurar que el DOM esté listo
   setTimeout(() => {
     initializeRecaptcha();
