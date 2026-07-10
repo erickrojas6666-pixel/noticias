@@ -1,5 +1,14 @@
 <!-- client/src/views/LoginView.vue -->
 <template>
+  <script setup lang="ts">
+// 👇 Agrega este log ANTES de usar siteKey
+console.log('🔍 Variables de entorno disponibles:', import.meta.env);
+console.log('🔍 VITE_RECAPTCHA_SITE_KEY:', import.meta.env.VITE_RECAPTCHA_SITE_KEY);
+
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
+console.log('🔑 Site Key final:', siteKey);
+</script>
+
   <div class="auth-container">
     <div class="auth-card">
       <h1>Iniciar Sesión</h1>
