@@ -69,7 +69,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
-import { VueRecaptcha } from 'vue-recaptcha';
+import VueRecaptcha from 'vue-recaptcha';
 
 const router = useRouter();
 const authStore = useAuthStore();

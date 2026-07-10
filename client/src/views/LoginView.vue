@@ -58,7 +58,7 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
-import { VueRecaptcha } from 'vue-recaptcha';
+import VueRecaptcha from 'vue-recaptcha';
 
 const router = useRouter();
 const route = useRoute();
