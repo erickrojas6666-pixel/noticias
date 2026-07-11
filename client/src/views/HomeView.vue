@@ -2,20 +2,22 @@
   <div>
     <h1>Inicio</h1>
     
-    
-    
+    <!-- Mensaje de carga -->
     <div v-if="cargando" style="text-align: center; padding: 20px;">
       ⏳ Cargando noticias...
     </div>
     
+    <!-- Mensaje de error -->
     <div v-else-if="error" style="color: red; padding: 20px; text-align: center;">
       ❌ {{ error }}
     </div>
     
+    <!-- Sin noticias -->
     <div v-else-if="noticias.length === 0" style="text-align: center; padding: 20px; color: #666;">
       📭 No hay noticias disponibles
     </div>
     
+    <!-- Grid de noticias -->
     <div v-else style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px;">
       <NoticiaCard 
         v-for="noticia in noticias" 
@@ -30,7 +32,7 @@
 import { ref, onMounted } from 'vue';
 import NoticiaCard from '../components/NoticiaCard.vue';
 import type { Noticia } from '../stores/noticiasStore';
-import { getServerUrl, apiFetch } from '../services/api';
+import { getServerUrl } from '../services/api';
 
 const noticias = ref<Noticia[]>([]);
 const cargando = ref(true);
@@ -43,8 +45,6 @@ const cargarNoticias = async () => {
   try {
     const baseUrl = getServerUrl();
     const apiUrl = `${baseUrl}/api/noticias`;
-    
-    console.log('🔗 Petición a:', apiUrl);
     
     const res = await fetch(apiUrl, {
       method: 'GET',
@@ -59,22 +59,11 @@ const cargarNoticias = async () => {
     }
     
     const data = await res.json();
-    console.log('📰 Datos completos:', data);
-    console.log('🔍 Total de artículos:', data.articles?.length);
-    console.log('🔍 Primer artículo:', data.articles?.[0]);
     
     if (data && data.articles && Array.isArray(data.articles)) {
       const articulosFiltrados = data.articles.filter(
-        (article: any) => {
-          const tieneTitle = !!article.title;
-          const tieneUrl = !!article.url;
-          console.log(`📌 Artículo: ${article.title?.substring(0, 20) || 'sin título'} - Title: ${tieneTitle}, URL: ${tieneUrl}`);
-          return tieneTitle && tieneUrl;
-        }
+        (article: any) => article.title && article.url
       );
-      
-      console.log('✅ Artículos después del filtro:', articulosFiltrados.length);
-      
       noticias.value = articulosFiltrados;
       
       if (noticias.value.length === 0) {
