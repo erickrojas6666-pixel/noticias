@@ -5,10 +5,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEWS_API_KEY=dc0ebbb259b8442ab9fcff63d1807f04
-  client:
-    build: ./client
-    ports:
-      - "5173:5173"
-    depends_on:
-      - server
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data

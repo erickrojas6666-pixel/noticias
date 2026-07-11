@@ -2,14 +2,7 @@
   <div>
     <h1>Inicio</h1>
     
-    <!-- Depuración -->
-    <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc; font-family: monospace; font-size: 12px;">
-      <strong>🔧 Debug:</strong> 
-      Cargando: {{ cargando }} | 
-      Error: {{ error }} | 
-      Noticias: {{ noticias.length }}
-      <span v-if="noticias.length > 0" style="color: green;"> ✅ Hay noticias</span>
-    </div>
+    
     
     <div v-if="cargando" style="text-align: center; padding: 20px;">
       ⏳ Cargando noticias...
